@@ -3,23 +3,16 @@ package db
 import (
 	"fmt"
 
+	"github.com/martzing/simple-wallet/configs"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
-type DBConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	DBName   string
-}
-
 var DB *gorm.DB
 
-func Connect(dbConfig DBConfig) {
+func Connect(dbConfig configs.DBConfig) {
 	dns := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		dbConfig.Username,
 		dbConfig.Password,

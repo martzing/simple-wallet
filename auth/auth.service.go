@@ -1,13 +1,17 @@
 package auth
 
 import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 	authDB "github.com/martzing/simple-wallet/auth/db"
+	"github.com/martzing/simple-wallet/configs"
 	"github.com/martzing/simple-wallet/db"
 	"github.com/martzing/simple-wallet/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func register(data *RegisterData) RegisterRes {
+func register(data *RegisterParams) RegisterRes {
 	dbTxn := db.NewTransaction()
 
 	defer func() {
@@ -53,4 +57,42 @@ func register(data *RegisterData) RegisterRes {
 		Username: user.Username,
 		Email:    user.Email,
 	}
+}
+
+func login(data *LoginParams) LoginRes {
+	dbTxn := db.NewTransaction()
+
+	defer func() {
+		if err := recover(); err != nil {
+			dbTxn.Rollback()
+			panic(err)
+		}
+	}()
+
+	dbTxn.Begin()
+
+	user := authDB.GetUser(dbTxn, data.Username)
+	if user == nil {
+		panic("User not found")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)); err != nil {
+		panic("Password is incorrect")
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &Claims{
+		UserID: user.ID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Minute)),
+		},
+	})
+
+	tokenString, err := token.SignedString([]byte(*configs.JwtSecret))
+
+	if err != nil {
+		panic(err)
+	}
+
+	dbTxn.Commit()
+	return LoginRes{Token: tokenString}
 }

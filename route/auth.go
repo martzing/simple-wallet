@@ -10,4 +10,9 @@ var authRoutes = []Route{
 		Path:    "/register",
 		Handler: auth.Register,
 	},
+	{
+		Method:  "POST",
+		Path:    "/login",
+		Handler: auth.Login,
+	},
 }

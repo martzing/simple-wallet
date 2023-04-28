@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/martzing/simple-wallet/configs"
 	"gorm.io/gorm"
 )
 
@@ -50,15 +51,7 @@ func registerCallback(db *gorm.DB, transactionId string) {
 func (dbTxn *DatabaseTransaction) Begin() {
 	transactionId := uuid.New().String()
 
-	config := DBConfig{
-		Host:     "localhost",
-		Port:     "3306",
-		Username: "root",
-		Password: "root",
-		DBName:   "db",
-	}
-
-	Connect(config)
+	Connect(*configs.DbConfig)
 
 	registerCallback(DB, transactionId)
 
