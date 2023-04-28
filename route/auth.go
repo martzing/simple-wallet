@@ -1,11 +1,13 @@
 package route
 
-//import  "github.com/martzing/simple-wallet/auth/controller/auth"
+import (
+	"github.com/martzing/simple-wallet/auth"
+)
 
-var healthRoutes = []Route{
+var authRoutes = []Route{
 	{
-		Method:  "GET",
-		Path:    "/ready",
-		Handler: authController.Register,
+		Method:  "POST",
+		Path:    "/register",
+		Handler: auth.Register,
 	},
 }
