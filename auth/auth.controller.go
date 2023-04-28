@@ -32,7 +32,8 @@ func Login(c *gin.Context) {
 			})
 		}
 	}()
-
+	// userId, _ := c.Get("userId")
+	// fmt.Printf("User: %d\n", userId)
 	c.Header("Content-Type", "application/json")
 	data := loginValidate(c)
 

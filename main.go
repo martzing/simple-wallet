@@ -9,9 +9,9 @@ import (
 )
 
 func main() {
-	r := gin.Default()
 	configs.BootConfig()
 	db.Connect(*configs.DbConfig)
+	r := gin.Default()
 	route.Init(r)
 	r.Run("localhost:9000")
 }

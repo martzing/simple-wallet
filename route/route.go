@@ -7,6 +7,7 @@ import (
 func Init(r *gin.Engine) {
 	auth := r.Group("/auth")
 	for _, route := range authRoutes {
-		auth.Handle(route.Method, route.Path, route.Handler)
+		route.Middleware = append(route.Middleware, route.Handler)
+		auth.Handle(route.Method, route.Path, route.Middleware...)
 	}
 }
