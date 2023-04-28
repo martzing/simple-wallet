@@ -13,6 +13,13 @@ import (
 
 func UserMiddleware(c *gin.Context) {
 	authorization := c.Request.Header["Authorization"]
+	if len(authorization) < 1 {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error": "Authorization is missing",
+		})
+		return
+	}
+
 	tokenString := strings.Replace(authorization[0], "Bearer ", "", 1)
 
 	claims := &auth.Claims{}
@@ -27,10 +34,12 @@ func UserMiddleware(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": "Token is expired",
 		})
+		return
 	} else if !token.Valid {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid token",
 		})
+		return
 	}
 	c.Set("userId", claims.UserID)
 	c.Next()
