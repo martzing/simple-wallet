@@ -1,12 +1,14 @@
 package auth
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	authDB "github.com/martzing/simple-wallet/auth/db"
 	"github.com/martzing/simple-wallet/configs"
 	"github.com/martzing/simple-wallet/db"
+	"github.com/martzing/simple-wallet/helpers"
 	"github.com/martzing/simple-wallet/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,7 +27,12 @@ func register(data *RegisterParams) RegisterRes {
 
 	duplicateUser := authDB.GetUser(dbTxn, data.Username)
 	if duplicateUser != nil {
-		panic("User already register")
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Message:    "User already register",
+			StatusCode: http.StatusUnauthorized,
+		}
+		panic(ce)
 	}
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(data.Password), 8)
 
@@ -73,11 +80,21 @@ func login(data *LoginParams) LoginRes {
 
 	user := authDB.GetUser(dbTxn, data.Username)
 	if user == nil {
-		panic("User not found")
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Message:    "User not found",
+			StatusCode: http.StatusUnauthorized,
+		}
+		panic(ce)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)); err != nil {
-		panic("Password is incorrect")
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Message:    "Password is incorrect",
+			StatusCode: http.StatusUnauthorized,
+		}
+		panic(ce)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &Claims{
@@ -90,7 +107,12 @@ func login(data *LoginParams) LoginRes {
 	tokenString, err := token.SignedString([]byte(*configs.JwtSecret))
 
 	if err != nil {
-		panic(err)
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Message:    err.Error(),
+			StatusCode: http.StatusUnauthorized,
+		}
+		panic(ce)
 	}
 
 	dbTxn.Commit()
