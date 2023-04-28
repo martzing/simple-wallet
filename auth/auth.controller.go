@@ -19,9 +19,7 @@ func Register(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 	data := registerValidate(c)
 
-	register(data)
+	res := register(data)
 
-	c.JSON(http.StatusOK, gin.H{
-		"body": data,
-	})
+	c.JSON(http.StatusOK, res)
 }
