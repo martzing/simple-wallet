@@ -27,3 +27,7 @@ type TransferTokenParams struct {
 	ToToken    string  `form:"to_token" json:"to_token" binding:"required,alpha,uppercase"`
 	Amount     float64 `form:"amount" json:"amount" binding:"required,number,gt=0"`
 }
+
+type TransferTokenRes struct {
+	Message string `form:"message" json:"message"`
+}

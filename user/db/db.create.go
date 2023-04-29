@@ -16,3 +16,15 @@ func CreateWallet(dbTxn db.DatabaseTransaction, wallet *models.Wallet) *models.W
 
 	return wallet
 }
+
+func CreateTransferTransaction(dbTxn db.DatabaseTransaction, transaction *models.TransferTransaction) *models.TransferTransaction {
+	db := dbTxn.Get()
+
+	err := db.Create(&transaction).Error
+
+	if err != nil {
+		panic(err)
+	}
+
+	return transaction
+}

@@ -1,8 +1,11 @@
 package user
 
 import (
+	"encoding/hex"
 	"net/http"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/martzing/simple-wallet/db"
 	"github.com/martzing/simple-wallet/helpers"
 	"github.com/martzing/simple-wallet/models"
@@ -96,7 +99,7 @@ func getWallet(userId int) []GetWalletRes {
 	return result
 }
 
-func transferToken(data *TransferTokenParams) (any, any) {
+func transferToken(data *TransferTokenParams) TransferTokenRes {
 	dbTxn := db.NewTransaction()
 
 	defer func() {
@@ -196,6 +199,19 @@ func transferToken(data *TransferTokenParams) (any, any) {
 	wallet.Balance = newWalletBalance
 	userDB.UpdateWallet(dbTxn, wallet)
 
+	toTokenAmount, _ := transferAmount.Float64()
+	tid, _ := hex.DecodeString(strings.ReplaceAll(uuid.New().String(), "-", ""))
+	userDB.CreateTransferTransaction(dbTxn, &models.TransferTransaction{
+		ID:              tid,
+		FromUserID:      data.FromUserId,
+		ToUserID:        user.ID,
+		FromTokenID:     fromToken.ID,
+		ToTokenID:       toToken.ID,
+		FromTokenAmount: data.Amount,
+		ToTokenAmount:   toTokenAmount,
+	})
 	dbTxn.Commit()
-	return user, wallet
+	return TransferTokenRes{
+		Message: "Transfer token success",
+	}
 }

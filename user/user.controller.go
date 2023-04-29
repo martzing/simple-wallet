@@ -56,10 +56,7 @@ func TransferToken(c *gin.Context) {
 	}()
 	c.Header("Content-Type", "application/json")
 	data := transferTokenValidate(c)
-	res1, res2 := transferToken(data)
+	res := transferToken(data)
 
-	c.JSON(http.StatusCreated, gin.H{
-		"res1": res1,
-		"res2": res2,
-	})
+	c.JSON(http.StatusCreated, res)
 }
