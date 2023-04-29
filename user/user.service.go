@@ -84,7 +84,6 @@ func getWallet(userId int) []GetWalletRes {
 
 	dbTxn.Begin(db.REPEATABLE_READ)
 	wallets := userDB.GetWallets(dbTxn, userId)
-	dbTxn.Commit()
 
 	result := []GetWalletRes{}
 	for _, wallet := range wallets {
@@ -96,6 +95,7 @@ func getWallet(userId int) []GetWalletRes {
 			Image:   wallet.Token.Image,
 		})
 	}
+	dbTxn.Commit()
 	return result
 }
 
@@ -228,7 +228,6 @@ func getTransferTokens(userId int) []GetTransferTokenRes {
 
 	dbTxn.Begin(db.REPEATABLE_READ)
 	txns := userDB.GetTransferTokens(dbTxn, userId)
-	dbTxn.Commit()
 
 	result := []GetTransferTokenRes{}
 	for _, txn := range txns {
@@ -242,5 +241,6 @@ func getTransferTokens(userId int) []GetTransferTokenRes {
 			TransactionDate: txn.CreatedAt,
 		})
 	}
+	dbTxn.Commit()
 	return result
 }

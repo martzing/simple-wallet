@@ -16,4 +16,10 @@ func Init(r *gin.Engine) {
 		route.Middleware = append(route.Middleware, route.Handler)
 		user.Handle(route.Method, route.Path, route.Middleware...)
 	}
+
+	admin := r.Group("/admin")
+	for _, route := range adminRoutes {
+		route.Middleware = append(route.Middleware, route.Handler)
+		admin.Handle(route.Method, route.Path, route.Middleware...)
+	}
 }
