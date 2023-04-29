@@ -42,3 +42,21 @@ func GetToken(dbTxn db.DatabaseTransaction, tokenId int) *models.Token {
 	}
 	return &token
 }
+
+func GetWallets(dbTxn db.DatabaseTransaction, userId int) *[]models.Wallet {
+	db := dbTxn.Get()
+
+	wallets := []models.Wallet{}
+
+	db = db.Where("user_id = ?", userId)
+	err := db.Preload("Token").Find(&wallets).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			panic(err)
+		}
+	}
+	return &wallets
+}

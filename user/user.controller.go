@@ -31,3 +31,16 @@ func GetToken(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
+
+func GetWallet(c *gin.Context) {
+	defer func() {
+		if err := recover(); err != nil {
+			helpers.AbortError(c, err)
+			return
+		}
+	}()
+	userId := getWalletValidate(c)
+	res := getWallet(userId)
+
+	c.JSON(http.StatusOK, res)
+}

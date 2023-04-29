@@ -6,11 +6,8 @@ import (
 
 var authRoutes = []Route{
 	{
-		Method: "POST",
-		Path:   "/register",
-		// Middleware: []gin.HandlerFunc{
-		// 	middleware.UserMiddleware,
-		// },
+		Method:  "POST",
+		Path:    "/register",
 		Handler: auth.Register,
 	},
 	{

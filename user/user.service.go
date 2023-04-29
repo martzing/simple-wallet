@@ -66,3 +66,30 @@ func getToken(tokenId int) GetTokenRes {
 		Value:  token.Value,
 	}
 }
+
+func getWallet(userId int) []GetWalletRes {
+	dbTxn := db.NewTransaction()
+
+	defer func() {
+		if err := recover(); err != nil {
+			dbTxn.Rollback()
+			panic(err)
+		}
+	}()
+
+	dbTxn.Begin()
+	wallets := userDB.GetWallets(dbTxn, userId)
+	dbTxn.Commit()
+
+	result := []GetWalletRes{}
+	for _, wallet := range *wallets {
+		result = append(result, GetWalletRes{
+			ID:      wallet.ID,
+			Balance: wallet.Balance,
+			Token:   wallet.Token.Name,
+			Symbol:  wallet.Token.Symbol,
+			Image:   wallet.Token.Image,
+		})
+	}
+	return result
+}

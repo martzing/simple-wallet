@@ -11,3 +11,11 @@ type GetTokenRes struct {
 	Image  string  `form:"image" json:"image"`
 	Value  float64 `form:"value" json:"value"`
 }
+
+type GetWalletRes struct {
+	ID      int     `form:"id" json:"id"`
+	Balance float64 `form:"balance" json:"balance"`
+	Token   string  `form:"token" json:"token"`
+	Symbol  string  `form:"symbol" json:"symbol"`
+	Image   string  `form:"image" json:"image"`
+}

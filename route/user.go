@@ -17,6 +17,14 @@ var userRoutes = []Route{
 	},
 	{
 		Method: "GET",
+		Path:   "/wallet",
+		Middleware: []gin.HandlerFunc{
+			middleware.UserMiddleware,
+		},
+		Handler: user.GetWallet,
+	},
+	{
+		Method: "GET",
 		Path:   "/token/:token_id",
 		Middleware: []gin.HandlerFunc{
 			middleware.UserMiddleware,
