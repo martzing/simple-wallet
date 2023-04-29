@@ -39,3 +39,10 @@ type UpdateTokenBalanceParams struct {
 type UpdateBalanceRes struct {
 	Message string `form:"message" json:"message"`
 }
+
+type GetTokenBalanceRes struct {
+	Name    string  `form:"name" json:"name"`
+	Symbol  string  `form:"symbol" json:"symbol"`
+	Image   string  `form:"image" json:"image"`
+	Balance float64 `form:"balance" json:"balance"`
+}

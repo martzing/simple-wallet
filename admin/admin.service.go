@@ -178,3 +178,42 @@ func updateTokenBalance(data *UpdateTokenBalanceParams, action string) UpdateBal
 		Message: "Update token balance success",
 	}
 }
+
+func getTokenBalance() []GetTokenBalanceRes {
+	dbTxn := db.NewTransaction()
+
+	defer func() {
+		if err := recover(); err != nil {
+			dbTxn.Rollback()
+			panic(err)
+		}
+	}()
+
+	dbTxn.Begin(db.REPEATABLE_READ)
+
+	tokens := adminDB.GetTokens(dbTxn)
+	wallets := adminDB.SumWalletBalance(dbTxn)
+
+	mapBalance := make(map[string]*GetTokenBalanceRes)
+	for _, token := range tokens {
+		mapBalance[token.Symbol] = &GetTokenBalanceRes{
+			Name:    token.Name,
+			Symbol:  token.Symbol,
+			Image:   token.Image,
+			Balance: 0,
+		}
+	}
+
+	for _, wallet := range wallets {
+		mapBalance[wallet.Token.Symbol].Balance = wallet.Total
+	}
+
+	result := []GetTokenBalanceRes{}
+	for _, balance := range mapBalance {
+		result = append(result, *balance)
+	}
+
+	dbTxn.Commit()
+
+	return result
+}

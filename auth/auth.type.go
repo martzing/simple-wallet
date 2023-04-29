@@ -1,6 +1,8 @@
 package auth
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type RegisterParams struct {
 	Username string `form:"username" json:"username" binding:"required,alphanum"`

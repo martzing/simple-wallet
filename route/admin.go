@@ -47,4 +47,12 @@ var adminRoutes = []Route{
 		},
 		Handler: admin.MinusTokenBalance,
 	},
+	{
+		Method: "GET",
+		Path:   "/token/balance",
+		Middleware: []gin.HandlerFunc{
+			middleware.AdminMiddleware,
+		},
+		Handler: admin.GetTokenBalance,
+	},
 }

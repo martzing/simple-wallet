@@ -76,3 +76,15 @@ func MinusTokenBalance(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
+
+func GetTokenBalance(c *gin.Context) {
+	defer func() {
+		if err := recover(); err != nil {
+			helpers.AbortError(c, err)
+			return
+		}
+	}()
+	res := getTokenBalance()
+
+	c.JSON(http.StatusOK, res)
+}

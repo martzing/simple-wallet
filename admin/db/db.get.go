@@ -26,6 +26,23 @@ func GetToken(dbTxn db.DatabaseTransaction, tokenId int) *models.Token {
 	return &token
 }
 
+func GetTokens(dbTxn db.DatabaseTransaction) []*models.Token {
+	db := dbTxn.Get()
+
+	tokens := []*models.Token{}
+
+	err := db.Find(&tokens).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			panic(err)
+		}
+	}
+	return tokens
+}
+
 func GetTokenBySymbol(dbTxn db.DatabaseTransaction, symbol string) *models.Token {
 	db := dbTxn.Get()
 
@@ -60,4 +77,21 @@ func GetWalletBy(dbTxn db.DatabaseTransaction, userId int, tokenId int) *models.
 		}
 	}
 	return &wallet
+}
+
+func SumWalletBalance(dbTxn db.DatabaseTransaction) []*SumWallet {
+	db := dbTxn.Get()
+
+	wallets := []*SumWallet{}
+
+	err := db.Model(&models.Wallet{}).Select("token_id, sum(balance) as total").InnerJoins("Token").Group("token_id").Find(&wallets).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			panic(err)
+		}
+	}
+	return wallets
 }
