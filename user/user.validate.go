@@ -75,3 +75,19 @@ func transferTokenValidate(c *gin.Context) *TransferTokenParams {
 
 	return validateStruct
 }
+
+func getTransferTokensValidate(c *gin.Context) int {
+	validate := validator.New()
+	userId := c.GetInt("userId")
+
+	if err := validate.Var(userId, "required,numeric,min=1"); err != nil {
+		var ce helpers.CustomError
+		ce = &helpers.ValidateError{
+			Message:    err.Error(),
+			StatusCode: http.StatusBadRequest,
+		}
+		panic(ce)
+	}
+
+	return userId
+}

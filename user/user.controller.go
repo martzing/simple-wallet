@@ -60,3 +60,17 @@ func TransferToken(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, res)
 }
+
+func GetTransferTokens(c *gin.Context) {
+	defer func() {
+		if err := recover(); err != nil {
+			helpers.AbortError(c, err)
+			return
+		}
+	}()
+	c.Header("Content-Type", "application/json")
+	userId := getTransferTokensValidate(c)
+	res := getTransferTokens(userId)
+
+	c.JSON(http.StatusOK, res)
+}

@@ -25,6 +25,14 @@ var userRoutes = []Route{
 	},
 	{
 		Method: "GET",
+		Path:   "/token/transfer",
+		Middleware: []gin.HandlerFunc{
+			middleware.UserMiddleware,
+		},
+		Handler: user.GetTransferTokens,
+	},
+	{
+		Method: "GET",
 		Path:   "/token/:token_id",
 		Middleware: []gin.HandlerFunc{
 			middleware.UserMiddleware,

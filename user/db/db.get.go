@@ -114,3 +114,21 @@ func GetWalletBy(dbTxn db.DatabaseTransaction, userId int, tokenId int) *models.
 	}
 	return &wallet
 }
+
+func GetTransferTokens(dbTxn db.DatabaseTransaction, userId int) []*models.TransferTransaction {
+	db := dbTxn.Get()
+
+	txns := []*models.TransferTransaction{}
+
+	db = db.Where("from_user_id = ?", userId)
+	err := db.Preload("ToUser").Preload("FromToken").Preload("ToToken").Find(&txns).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			panic(err)
+		}
+	}
+	return txns
+}

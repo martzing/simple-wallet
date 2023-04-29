@@ -1,5 +1,7 @@
 package user
 
+import "time"
+
 type GetTokenParams struct {
 	TokenID int `form:"token_id" json:"token_id" binding:"required"`
 }
@@ -30,4 +32,14 @@ type TransferTokenParams struct {
 
 type TransferTokenRes struct {
 	Message string `form:"message" json:"message"`
+}
+
+type GetTransferTokenRes struct {
+	ID              string    `form:"id" json:"id"`
+	ToUser          string    `form:"to_user" json:"to_user"`
+	FromToken       string    `form:"from_token" json:"from_token"`
+	ToToken         string    `form:"to_token" json:"to_token"`
+	FromTokenAmount float64   `form:"from_token_amount" json:"from_token_amount"`
+	ToTokenAmount   float64   `form:"to_token_amount" json:"to_token_amount"`
+	TransactionDate time.Time `form:"transaction_date" json:"transaction_date"`
 }

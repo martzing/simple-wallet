@@ -215,3 +215,32 @@ func transferToken(data *TransferTokenParams) TransferTokenRes {
 		Message: "Transfer token success",
 	}
 }
+
+func getTransferTokens(userId int) []GetTransferTokenRes {
+	dbTxn := db.NewTransaction()
+
+	defer func() {
+		if err := recover(); err != nil {
+			dbTxn.Rollback()
+			panic(err)
+		}
+	}()
+
+	dbTxn.Begin(db.REPEATABLE_READ)
+	txns := userDB.GetTransferTokens(dbTxn, userId)
+	dbTxn.Commit()
+
+	result := []GetTransferTokenRes{}
+	for _, txn := range txns {
+		result = append(result, GetTransferTokenRes{
+			ID:              hex.EncodeToString(txn.ID),
+			ToUser:          txn.ToUser.Username,
+			FromToken:       txn.FromToken.Name,
+			ToToken:         txn.ToToken.Name,
+			FromTokenAmount: txn.FromTokenAmount,
+			ToTokenAmount:   txn.ToTokenAmount,
+			TransactionDate: txn.CreatedAt,
+		})
+	}
+	return result
+}
