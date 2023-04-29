@@ -30,7 +30,7 @@ func register(data *RegisterParams) RegisterRes {
 		var ce helpers.CustomError
 		ce = &helpers.Error{
 			Message:    "User already register",
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusConflict,
 		}
 		panic(ce)
 	}
@@ -83,7 +83,7 @@ func login(data *LoginParams) LoginRes {
 		var ce helpers.CustomError
 		ce = &helpers.Error{
 			Message:    "User not found",
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusNotFound,
 		}
 		panic(ce)
 	}

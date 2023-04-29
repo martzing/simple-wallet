@@ -10,4 +10,10 @@ func Init(r *gin.Engine) {
 		route.Middleware = append(route.Middleware, route.Handler)
 		auth.Handle(route.Method, route.Path, route.Middleware...)
 	}
+
+	user := r.Group("/user")
+	for _, route := range userRoutes {
+		route.Middleware = append(route.Middleware, route.Handler)
+		user.Handle(route.Method, route.Path, route.Middleware...)
+	}
 }

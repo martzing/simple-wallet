@@ -14,9 +14,9 @@ func registerValidate(c *gin.Context) *RegisterParams {
 
 	if err := c.Bind(validateStruct); err != nil {
 		var ce helpers.CustomError
-		ce = &helpers.ValidateError{
+		ce = &helpers.Error{
 			Message:    err.Error(),
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusBadRequest,
 		}
 		panic(ce)
 	}
@@ -25,7 +25,7 @@ func registerValidate(c *gin.Context) *RegisterParams {
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
 			Message:    err.Error(),
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusBadRequest,
 		}
 		panic(ce)
 	}
@@ -39,9 +39,9 @@ func loginValidate(c *gin.Context) *LoginParams {
 
 	if err := c.Bind(validateStruct); err != nil {
 		var ce helpers.CustomError
-		ce = &helpers.ValidateError{
+		ce = &helpers.Error{
 			Message:    err.Error(),
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusBadRequest,
 		}
 		panic(ce)
 	}
@@ -50,7 +50,7 @@ func loginValidate(c *gin.Context) *LoginParams {
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
 			Message:    err.Error(),
-			StatusCode: http.StatusUnauthorized,
+			StatusCode: http.StatusBadRequest,
 		}
 		panic(ce)
 	}
