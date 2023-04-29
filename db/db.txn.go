@@ -13,6 +13,11 @@ type DatabaseTransaction struct {
 	transactionId string
 }
 
+var REPEATABLE_READ = "REPEATABLE READ"
+var READ_COMMITTED = "READ COMMITTED"
+var READ_UNCOMMITTED = "READ UNCOMMITTED"
+var SERIALIZABLE = "SERIALIZABLE"
+
 func NewTransaction() DatabaseTransaction {
 	dbTxn := DatabaseTransaction{}
 	return dbTxn
@@ -25,7 +30,9 @@ func executeTransaction(db *gorm.DB, transactionId string) {
 	fmt.Printf("Transaction (%s): %s\n", transactionId, sql)
 }
 
-func registerCallback(db *gorm.DB, transactionId string) {
+func registerCallback(db *gorm.DB, transactionId string, isolationLevel string) {
+	isolationLevelSql := fmt.Sprintf("SET TRANSACTION ISOLATION LEVEL %s", isolationLevel)
+	db = db.Exec(isolationLevelSql)
 	callback := db.Callback()
 
 	callback.Create().Register("execute_transaction", func(db *gorm.DB) {
@@ -48,12 +55,12 @@ func registerCallback(db *gorm.DB, transactionId string) {
 	})
 }
 
-func (dbTxn *DatabaseTransaction) Begin() {
+func (dbTxn *DatabaseTransaction) Begin(isolationLevel string) {
 	transactionId := uuid.New().String()
 
 	Connect(*configs.DbConfig)
 
-	registerCallback(DB, transactionId)
+	registerCallback(DB, transactionId, isolationLevel)
 
 	dbTxn.db = DB.Begin()
 	dbTxn.transactionId = transactionId

@@ -19,3 +19,11 @@ type GetWalletRes struct {
 	Symbol  string  `form:"symbol" json:"symbol"`
 	Image   string  `form:"image" json:"image"`
 }
+
+type TransferTokenParams struct {
+	FromUserId int     `form:"from_user_id" json:"from_user_id" binding:"required,numeric,min=1"`
+	ToUserId   int     `form:"to_user_id" json:"to_user_id" binding:"required,numeric,min=1"`
+	FromToken  string  `form:"from_token" json:"from_token" binding:"required,alpha,uppercase"`
+	ToToken    string  `form:"to_token" json:"to_token" binding:"required,alpha,uppercase"`
+	Amount     float64 `form:"amount" json:"amount" binding:"required,number,gt=0"`
+}

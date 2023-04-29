@@ -16,12 +16,12 @@ var userRoutes = []Route{
 		Handler: user.GetTokens,
 	},
 	{
-		Method: "GET",
-		Path:   "/wallet",
+		Method: "POST",
+		Path:   "/token/transfer",
 		Middleware: []gin.HandlerFunc{
 			middleware.UserMiddleware,
 		},
-		Handler: user.GetWallet,
+		Handler: user.TransferToken,
 	},
 	{
 		Method: "GET",
@@ -30,5 +30,13 @@ var userRoutes = []Route{
 			middleware.UserMiddleware,
 		},
 		Handler: user.GetToken,
+	},
+	{
+		Method: "GET",
+		Path:   "/wallet",
+		Middleware: []gin.HandlerFunc{
+			middleware.UserMiddleware,
+		},
+		Handler: user.GetWallet,
 	},
 }

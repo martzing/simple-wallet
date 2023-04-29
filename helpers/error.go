@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -31,7 +32,9 @@ func (e *Error) GetStatusCode() int {
 }
 
 func (ve *ValidateError) GetMessage() string {
-	msg := strings.TrimSpace(strings.Split(ve.Message, ":")[2])
+	fmt.Println(ve.Message)
+	msg := strings.Split(ve.Message, "\n")[0]
+	msg = strings.TrimSpace(strings.Split(msg, ":")[2])
 	return msg
 }
 

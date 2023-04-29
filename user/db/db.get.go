@@ -8,10 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetTokens(dbTxn db.DatabaseTransaction) *[]models.Token {
+func GetTokens(dbTxn db.DatabaseTransaction) []*models.Token {
 	db := dbTxn.Get()
 
-	tokens := []models.Token{}
+	tokens := []*models.Token{}
 
 	err := db.Find(&tokens).Error
 
@@ -22,7 +22,7 @@ func GetTokens(dbTxn db.DatabaseTransaction) *[]models.Token {
 			panic(err)
 		}
 	}
-	return &tokens
+	return tokens
 }
 
 func GetToken(dbTxn db.DatabaseTransaction, tokenId int) *models.Token {
@@ -43,10 +43,10 @@ func GetToken(dbTxn db.DatabaseTransaction, tokenId int) *models.Token {
 	return &token
 }
 
-func GetWallets(dbTxn db.DatabaseTransaction, userId int) *[]models.Wallet {
+func GetWallets(dbTxn db.DatabaseTransaction, userId int) []*models.Wallet {
 	db := dbTxn.Get()
 
-	wallets := []models.Wallet{}
+	wallets := []*models.Wallet{}
 
 	db = db.Where("user_id = ?", userId)
 	err := db.Preload("Token").Find(&wallets).Error
@@ -58,5 +58,59 @@ func GetWallets(dbTxn db.DatabaseTransaction, userId int) *[]models.Wallet {
 			panic(err)
 		}
 	}
-	return &wallets
+	return wallets
+}
+
+func GetUser(dbTxn db.DatabaseTransaction, userId int) *models.User {
+	db := dbTxn.Get()
+
+	user := models.User{}
+
+	db = db.Where("id = ?", userId)
+	err := db.First(&user).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			panic(err)
+		}
+	}
+	return &user
+}
+
+func GetTokenBySymbols(dbTxn db.DatabaseTransaction, symbols []string) []*models.Token {
+	db := dbTxn.Get()
+
+	tokens := []*models.Token{}
+
+	db = db.Where("symbol IN ?", symbols)
+	err := db.Find(&tokens).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			panic(err)
+		}
+	}
+	return tokens
+}
+
+func GetWalletBy(dbTxn db.DatabaseTransaction, userId int, tokenId int) *models.Wallet {
+	db := dbTxn.Get()
+
+	wallet := models.Wallet{}
+
+	db = db.Where("user_id = ? AND token_id = ?", userId, tokenId)
+	err := db.First(&wallet).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			panic(err)
+		}
+	}
+	return &wallet
 }

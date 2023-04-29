@@ -14,7 +14,7 @@ func registerValidate(c *gin.Context) *RegisterParams {
 
 	if err := c.Bind(validateStruct); err != nil {
 		var ce helpers.CustomError
-		ce = &helpers.Error{
+		ce = &helpers.ValidateError{
 			Message:    err.Error(),
 			StatusCode: http.StatusBadRequest,
 		}
@@ -39,7 +39,7 @@ func loginValidate(c *gin.Context) *LoginParams {
 
 	if err := c.Bind(validateStruct); err != nil {
 		var ce helpers.CustomError
-		ce = &helpers.Error{
+		ce = &helpers.ValidateError{
 			Message:    err.Error(),
 			StatusCode: http.StatusBadRequest,
 		}

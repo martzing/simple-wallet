@@ -26,10 +26,10 @@ func GetUser(dbTxn db.DatabaseTransaction, username string) *models.User {
 	return &user
 }
 
-func GetTokens(dbTxn db.DatabaseTransaction) *[]models.Token {
+func GetTokens(dbTxn db.DatabaseTransaction) []*models.Token {
 	db := dbTxn.Get()
 
-	tokens := []models.Token{}
+	tokens := []*models.Token{}
 
 	err := db.Find(&tokens).Error
 
@@ -40,5 +40,5 @@ func GetTokens(dbTxn db.DatabaseTransaction) *[]models.Token {
 			panic(err)
 		}
 	}
-	return &tokens
+	return tokens
 }

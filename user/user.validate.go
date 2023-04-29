@@ -50,3 +50,28 @@ func getWalletValidate(c *gin.Context) int {
 
 	return userId
 }
+
+func transferTokenValidate(c *gin.Context) *TransferTokenParams {
+	validate := validator.New()
+	validateStruct := new(TransferTokenParams)
+
+	if err := c.Bind(validateStruct); err != nil {
+		var ce helpers.CustomError
+		ce = &helpers.ValidateError{
+			Message:    err.Error(),
+			StatusCode: http.StatusBadRequest,
+		}
+		panic(ce)
+	}
+
+	if err := validate.Struct(validateStruct); err != nil {
+		var ce helpers.CustomError
+		ce = &helpers.ValidateError{
+			Message:    err.Error(),
+			StatusCode: http.StatusBadRequest,
+		}
+		panic(ce)
+	}
+
+	return validateStruct
+}

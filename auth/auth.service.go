@@ -23,7 +23,7 @@ func register(data *RegisterParams) RegisterRes {
 		}
 	}()
 
-	dbTxn.Begin()
+	dbTxn.Begin(db.REPEATABLE_READ)
 
 	duplicateUser := authDB.GetUser(dbTxn, data.Username)
 	if duplicateUser != nil {
@@ -50,7 +50,7 @@ func register(data *RegisterParams) RegisterRes {
 	tokens := authDB.GetTokens(dbTxn)
 
 	wallets := []*models.Wallet{}
-	for _, token := range *tokens {
+	for _, token := range tokens {
 		wallets = append(wallets, &models.Wallet{
 			Balance: 0,
 			TokenID: token.ID,
@@ -76,7 +76,7 @@ func login(data *LoginParams) LoginRes {
 		}
 	}()
 
-	dbTxn.Begin()
+	dbTxn.Begin(db.REPEATABLE_READ)
 
 	user := authDB.GetUser(dbTxn, data.Username)
 	if user == nil {
