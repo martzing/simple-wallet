@@ -50,6 +50,11 @@ func AdminMiddleware(c *gin.Context) {
 
 	user, err := userDB.GetUser(db.DB, claims.UserID)
 
+	if err != nil {
+		helpers.AbortError(c, err)
+		return
+	}
+
 	if user == nil {
 		msg := "User not found"
 		code := http.StatusNotFound
