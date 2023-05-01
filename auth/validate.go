@@ -8,52 +8,60 @@ import (
 	"github.com/martzing/simple-wallet/helpers"
 )
 
-func registerValidate(c *gin.Context) *RegisterParams {
+func registerValidate(c *gin.Context) (*RegisterParams, helpers.CustomError) {
 	validate := validator.New()
 	validateStruct := new(RegisterParams)
 
 	if err := c.Bind(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
 	if err := validate.Struct(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
-	return validateStruct
+	return validateStruct, nil
 }
 
-func loginValidate(c *gin.Context) *LoginParams {
+func loginValidate(c *gin.Context) (*LoginParams, helpers.CustomError) {
 	validate := validator.New()
 	validateStruct := new(LoginParams)
 
 	if err := c.Bind(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
 	if err := validate.Struct(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
-	return validateStruct
+	return validateStruct, nil
 }

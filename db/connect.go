@@ -10,9 +10,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-var DB *gorm.DB
-
-func Connect(dbConfig configs.DBConfig) {
+func Connect(dbConfig configs.DBConfig) (*gorm.DB, error) {
 	dns := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		dbConfig.Username,
 		dbConfig.Password,
@@ -28,9 +26,5 @@ func Connect(dbConfig configs.DBConfig) {
 		},
 	})
 
-	if err != nil {
-		panic(err)
-	}
-
-	DB = db
+	return db, err
 }

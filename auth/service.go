@@ -13,41 +13,61 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func register(data *RegisterParams) RegisterRes {
-	dbTxn := db.NewTransaction()
+func register(data *RegisterParams) (*RegisterRes, helpers.CustomError) {
 
-	defer func() {
-		if err := recover(); err != nil {
-			dbTxn.Rollback()
-			panic(err)
-		}
-	}()
-
-	dbTxn.Begin(db.REPEATABLE_READ)
-
-	duplicateUser := authDB.GetUser(dbTxn, data.Username)
+	duplicateUser, err := authDB.GetUser(db.DB, data.Username)
 	if duplicateUser != nil {
+		msg := "User already register"
+		code := http.StatusConflict
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    "User already register",
-			StatusCode: http.StatusConflict,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
+
+	tokens, err := authDB.GetTokens(db.DB)
+
+	if err != nil {
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Err: err,
+		}
+		return nil, ce
+	}
+
 	hashed, _ := bcrypt.GenerateFromPassword([]byte(data.Password), 8)
 
 	passHash := string(hashed)
 
-	params := authDB.CreateUserParams{
+	dbTxn := db.NewTransaction()
+	DB, err := dbTxn.Begin(db.REPEATABLE_READ)
+
+	if err != nil {
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Err: err,
+		}
+		return nil, ce
+	}
+
+	user, err := authDB.CreateUser(DB, &models.User{
 		Username: data.Username,
 		Password: passHash,
 		Email:    data.Email,
 		Role:     "user",
 		IsActive: true,
-	}
-	user := authDB.CreateUser(dbTxn, &params)
+	})
 
-	tokens := authDB.GetTokens(dbTxn)
+	if err != nil {
+		dbTxn.Rollback()
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Err: err,
+		}
+		return nil, ce
+	}
 
 	wallets := []*models.Wallet{}
 	for _, token := range tokens {
@@ -57,44 +77,49 @@ func register(data *RegisterParams) RegisterRes {
 			UserID:  user.ID,
 		})
 	}
-	authDB.CreateWallets(dbTxn, wallets)
-	dbTxn.Commit()
 
-	return RegisterRes{
-		Username: user.Username,
-		Email:    user.Email,
-	}
-}
+	_, _err := authDB.CreateWallets(DB, wallets)
 
-func login(data *LoginParams) LoginRes {
-	dbTxn := db.NewTransaction()
-
-	defer func() {
-		if err := recover(); err != nil {
-			dbTxn.Rollback()
-			panic(err)
-		}
-	}()
-
-	dbTxn.Begin(db.REPEATABLE_READ)
-
-	user := authDB.GetUser(dbTxn, data.Username)
-	if user == nil {
+	if _err != nil {
+		dbTxn.Rollback()
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    "User not found",
-			StatusCode: http.StatusNotFound,
+			Err: _err,
 		}
-		panic(ce)
+		return nil, ce
+	}
+
+	dbTxn.Commit()
+
+	return &RegisterRes{
+		Username: user.Username,
+		Email:    user.Email,
+	}, nil
+}
+
+func login(data *LoginParams) (*LoginRes, helpers.CustomError) {
+
+	user, err := authDB.GetUser(db.DB, data.Username)
+	if user == nil {
+		msg := "User not found"
+		code := http.StatusNotFound
+		var ce helpers.CustomError
+		ce = &helpers.Error{
+			Message:    &msg,
+			StatusCode: &code,
+		}
+		return nil, ce
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)); err != nil {
+		msg := "Password is incorrect"
+		code := http.StatusUnauthorized
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    "Password is incorrect",
-			StatusCode: http.StatusUnauthorized,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &Claims{
@@ -109,12 +134,10 @@ func login(data *LoginParams) LoginRes {
 	if err != nil {
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    err.Error(),
-			StatusCode: http.StatusUnauthorized,
+			Err: err,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
-	dbTxn.Commit()
-	return LoginRes{Token: tokenString}
+	return &LoginRes{Token: tokenString}, nil
 }

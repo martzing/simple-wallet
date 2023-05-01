@@ -18,21 +18,39 @@ var READ_COMMITTED = "READ COMMITTED"
 var READ_UNCOMMITTED = "READ UNCOMMITTED"
 var SERIALIZABLE = "SERIALIZABLE"
 
+var DB *gorm.DB
+
+func ConnectDB() error {
+	db, err := Connect(*configs.DbConfig)
+
+	DB = db
+
+	registerCallback(db, nil, nil)
+
+	return err
+}
+
 func NewTransaction() DatabaseTransaction {
 	dbTxn := DatabaseTransaction{}
 	return dbTxn
 }
 
-func executeTransaction(db *gorm.DB, transactionId string) {
+func executeTransaction(db *gorm.DB, transactionId *string) {
 	statement := db.Statement
 	sql := db.Explain(statement.SQL.String(), statement.Vars...)
 
-	fmt.Printf("Transaction (%s): %s\n", transactionId, sql)
+	tid := "default"
+	if transactionId != nil {
+		tid = *transactionId
+	}
+	fmt.Printf("Transaction (%s): %s\n", tid, sql)
 }
 
-func registerCallback(db *gorm.DB, transactionId string, isolationLevel string) {
-	isolationLevelSql := fmt.Sprintf("SET TRANSACTION ISOLATION LEVEL %s", isolationLevel)
-	db = db.Exec(isolationLevelSql)
+func registerCallback(db *gorm.DB, transactionId *string, isolationLevel *string) {
+	if isolationLevel != nil {
+		isolationLevelSql := fmt.Sprintf("SET TRANSACTION ISOLATION LEVEL %s", *isolationLevel)
+		db = db.Exec(isolationLevelSql)
+	}
 	callback := db.Callback()
 
 	callback.Create().Register("execute_transaction", func(db *gorm.DB) {
@@ -55,17 +73,23 @@ func registerCallback(db *gorm.DB, transactionId string, isolationLevel string) 
 	})
 }
 
-func (dbTxn *DatabaseTransaction) Begin(isolationLevel string) {
+func (dbTxn *DatabaseTransaction) Begin(isolationLevel string) (*gorm.DB, error) {
 	transactionId := uuid.New().String()
 
-	Connect(*configs.DbConfig)
+	db, err := Connect(*configs.DbConfig)
 
-	registerCallback(DB, transactionId, isolationLevel)
+	if err != nil {
+		return nil, err
+	}
 
-	dbTxn.db = DB.Begin()
+	registerCallback(db, &transactionId, &isolationLevel)
+
+	dbTxn.db = db.Begin()
 	dbTxn.transactionId = transactionId
 
 	fmt.Printf("Transaction (%s): Start Transaction\n", dbTxn.transactionId)
+
+	return db, nil
 }
 
 func (dbTxn *DatabaseTransaction) Get() *gorm.DB {

@@ -13,22 +13,17 @@ import (
 )
 
 func UserMiddleware(c *gin.Context) {
-	defer func() {
-		if err := recover(); err != nil {
-			helpers.AbortError(c, err)
-			return
-		}
-	}()
-
 	authorization := c.Request.Header["Authorization"]
 	if len(authorization) < 1 {
-
+		msg := "Authorization is missing"
+		code := http.StatusUnauthorized
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    "Authorization is missing",
-			StatusCode: http.StatusUnauthorized,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		helpers.AbortError(c, ce)
+		return
 	}
 
 	tokenString := strings.Replace(authorization[0], "Bearer ", "", 1)
@@ -40,12 +35,15 @@ func UserMiddleware(c *gin.Context) {
 	}, jwt.WithLeeway(5*time.Second))
 
 	if err != nil {
+		msg := strings.TrimSpace(strings.Split(err.Error(), ":")[1])
+		code := http.StatusUnauthorized
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    strings.TrimSpace(strings.Split(err.Error(), ":")[1]),
-			StatusCode: http.StatusUnauthorized,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		helpers.AbortError(c, ce)
+		return
 	}
 
 	c.Set("userId", claims.UserID)

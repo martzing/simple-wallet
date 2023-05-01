@@ -9,56 +9,64 @@ import (
 	"github.com/martzing/simple-wallet/helpers"
 )
 
-func createTokenValidate(c *gin.Context) *CreateTokenParams {
+func createTokenValidate(c *gin.Context) (*CreateTokenParams, helpers.CustomError) {
 	validate := validator.New()
 	validateStruct := new(CreateTokenParams)
 
 	if err := c.Bind(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
 	if err := validate.Struct(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
-	return validateStruct
+	return validateStruct, nil
 }
 
-func updateTokenValidate(c *gin.Context) *UpdateTokenParams {
+func updateTokenValidate(c *gin.Context) (*UpdateTokenParams, helpers.CustomError) {
 	validate := validator.New()
 	validateStruct := new(UpdateTokenParams)
 	if err := c.Bind(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
 	if err := validate.Struct(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
-	return validateStruct
+	return validateStruct, nil
 }
 
-func deleteTokenValidate(c *gin.Context) int {
+func deleteTokenValidate(c *gin.Context) (*int, helpers.CustomError) {
 	validate := validator.New()
 
 	tokenId, err := strconv.Atoi(c.Param("token_id"))
@@ -66,45 +74,50 @@ func deleteTokenValidate(c *gin.Context) int {
 	if err != nil {
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Err: err,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
 	if err := validate.Var(tokenId, "required,numeric,min=1"); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
-	return tokenId
+	return &tokenId, nil
 }
 
-func updateTokenBalanceValidate(c *gin.Context) *UpdateTokenBalanceParams {
+func updateTokenBalanceValidate(c *gin.Context) (*UpdateTokenBalanceParams, helpers.CustomError) {
 	validate := validator.New()
 	validateStruct := new(UpdateTokenBalanceParams)
 
 	if err := c.Bind(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
 	if err := validate.Struct(validateStruct); err != nil {
+		msg := err.Error()
+		code := http.StatusBadRequest
 		var ce helpers.CustomError
 		ce = &helpers.ValidateError{
-			Message:    err.Error(),
-			StatusCode: http.StatusBadRequest,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		return nil, ce
 	}
 
-	return validateStruct
+	return validateStruct, nil
 }

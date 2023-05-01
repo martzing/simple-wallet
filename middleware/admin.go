@@ -15,23 +15,17 @@ import (
 )
 
 func AdminMiddleware(c *gin.Context) {
-	dbTxn := db.NewTransaction()
-	defer func() {
-		if err := recover(); err != nil {
-			helpers.AbortError(c, err)
-			return
-		}
-	}()
-
 	authorization := c.Request.Header["Authorization"]
 	if len(authorization) < 1 {
-
+		msg := "Authorization is missing"
+		code := http.StatusUnauthorized
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    "Authorization is missing",
-			StatusCode: http.StatusUnauthorized,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		helpers.AbortError(c, ce)
+		return
 	}
 
 	tokenString := strings.Replace(authorization[0], "Bearer ", "", 1)
@@ -43,35 +37,41 @@ func AdminMiddleware(c *gin.Context) {
 	}, jwt.WithLeeway(5*time.Second))
 
 	if err != nil {
+		msg := strings.TrimSpace(strings.Split(err.Error(), ":")[1])
+		code := http.StatusUnauthorized
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    strings.TrimSpace(strings.Split(err.Error(), ":")[1]),
-			StatusCode: http.StatusUnauthorized,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		helpers.AbortError(c, ce)
+		return
 	}
-	dbTxn.Begin(db.REPEATABLE_READ)
-	user := userDB.GetUser(dbTxn, claims.UserID)
+
+	user, err := userDB.GetUser(db.DB, claims.UserID)
 
 	if user == nil {
-		dbTxn.Rollback()
+		msg := "User not found"
+		code := http.StatusNotFound
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    "User not found",
-			StatusCode: http.StatusNotFound,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		helpers.AbortError(c, ce)
+		return
 	}
 	if user.Role != "admin" {
-		dbTxn.Rollback()
+		msg := "You don't have permission for this API"
+		code := http.StatusForbidden
 		var ce helpers.CustomError
 		ce = &helpers.Error{
-			Message:    "You don't have permission for this API",
-			StatusCode: http.StatusForbidden,
+			Message:    &msg,
+			StatusCode: &code,
 		}
-		panic(ce)
+		helpers.AbortError(c, ce)
+		return
 	}
 	c.Set("userId", claims.UserID)
-	dbTxn.Commit()
 	c.Next()
 }

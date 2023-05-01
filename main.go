@@ -12,7 +12,11 @@ import (
 
 func main() {
 	configs.BootConfig()
-	db.Connect(*configs.DbConfig)
+	err := db.ConnectDB()
+
+	if err != nil {
+		panic(err)
+	}
 
 	r := gin.Default()
 	r.Use(cors.Default())
